@@ -5,13 +5,17 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.annotation.PostConstruct;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -37,9 +41,12 @@ public class BuildReport {
 
 	private static final Logger log = Logger.getLogger(BuildReport.class);
 
+	@Value("${app.mail.to}")
+	private String mailTo;
+	
 	@Value("${app.db.user}")
 	private String dbuser;
-
+	
 	@Value("${app.db.password}")
 	private String dbpassword;
 
@@ -51,15 +58,9 @@ public class BuildReport {
 
 	@Value("${app.mail.account}")
 	private String mailAccount;
+	
 	@Value("${app.mail.password}")
-	private String mailPassword;
-
-	@PostConstruct
-	private void checkValues() {
-		log.info(dburl);
-		log.info(dbuser);
-		log.info("-----Post Construct ----");
-	}
+	private String mailPassword;	
 
 	private Connection getConnection() {
 
@@ -82,18 +83,26 @@ public class BuildReport {
 		return null;
 	}
 
+	private Date getDateLessOne(){
+		Calendar cal = new GregorianCalendar();
+		cal.setTime(new Date());
+		cal.add(Calendar.DAY_OF_MONTH, -1);
+		return cal.getTime();
+	}
+	
 	private void generatePDF(File source, String destFolder) {
 		Connection connection = getConnection();
 		String compiledReport;
 		try {
+			DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 			compiledReport = JasperCompileManager.compileReportToFile(source.getAbsolutePath());
-			Map<String, Object> params = new HashMap<String, Object>();
+			Map<String, Object> params = new HashMap<String, Object>();			
+			params.put("FECHA", df.format(getDateLessOne()));
 			JasperPrint jasperPrint = JasperFillManager.fillReport(compiledReport, params, connection);
 			String destFileName = destFolder+File.separator+source.getName().replace(".jrxml", ".pdf");
 			JasperExportManager.exportReportToPdfFile(jasperPrint, destFileName);
-		} catch (JRException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (JRException e) { 
+			log.error("Error en la compilación del fichero ",e);
 		}
 	}
 
@@ -112,8 +121,8 @@ public class BuildReport {
 		properties.put("mail.smtp.host", "mail.gmail.com");
 		properties.put("mail.smtp.starttls.enable", "true");
 		properties.put("mail.smtp.port", 25);
-		properties.put("mail.smtp.mail.sender", "juanjo.alejandro@@gmail.com");
-		properties.put("mail.smtp.user", "juanjo.alejandro");
+		properties.put("mail.smtp.mail.sender", "europlayas.alarms@gmail.com");
+		properties.put("mail.smtp.user", mailAccount);
 		properties.put("mail.smtp.auth", "true");
 		return properties;
 	}
@@ -140,8 +149,10 @@ public class BuildReport {
 
 			Session session = Session.getDefaultInstance(init(), null);
 			Message message = new MimeMessage(session);
-			message.addRecipient(Message.RecipientType.TO, new InternetAddress("juanjoalejan@gmail.com"));
-			message.addRecipient(Message.RecipientType.CC, new InternetAddress("mireia.alejandro@gmail.com"));
+			String buffer[] = mailTo.split(",");
+			for (int i=0; i<buffer.length; i++){
+				message.addRecipient(Message.RecipientType.TO, new InternetAddress(buffer[i].trim()));
+			}			
 			message.setSubject("Greetings from IT..");
 			Multipart multipart = new MimeMultipart();
 
@@ -163,7 +174,7 @@ public class BuildReport {
 			Transport transport = session.getTransport("smtp");
 			// Enter your correct gmail UserID and Password
 			// if you have 2FA enabled then provide App Specific Password
-			transport.connect("smtp.gmail.com", "juanjo.alejandro", "florindo11");
+			transport.connect("smtp.gmail.com", mailAccount, mailPassword);
 			transport.sendMessage(message, message.getAllRecipients());
 			transport.close();
 			for (File f : listFilesForFolder)

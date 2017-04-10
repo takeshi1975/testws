@@ -17,9 +17,9 @@ public class MainController {
 	
 	@Value("${app.source.folder}")
 	private String sourceFolder;
+	
 	@Value("${app.dest.folder}")
-	private String destFolder;
-		
+	private String destFolder;	
 	
 	@RequestMapping("/")
 	@Scheduled(cron="0 0 9,15 * * ?")
