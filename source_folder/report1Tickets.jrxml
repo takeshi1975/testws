@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1Test" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d70d29b6-283b-40f7-98c7-351e41a7d30b">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1Test" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d70d29b6-283b-40f7-98c7-351e41a7d30b">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
@@ -7,16 +7,19 @@
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[select ser.codigo codigoservicio, ser.nombre nombreservicio, s.codigo codigosistema, r.localizador, nvl(r.expediente,' ') as EXPEDIENTE, r.fecha_creacion, r.fecha_inicio, r.estado estadoReserva, rp.estado estadoServicio, (nvl(TO_CHAR(rp.paquete_id),' ')) as paquete_id
+		<![CDATA[select ser.codigo codigoservicio, ser.nombre nombreservicio, s.codigo codigosistema, r.localizador, r.expediente, r.fecha_creacion, r.fecha_inicio, r.estado estadoReserva, rp.estado estadoServicio
   from reserva r, reserva_proser rp, sistema s, contrato c, proveedor_servicio ps, servicio ser
  where r.id = rp.reserva_id
    and s.id = r.sistema_id
+   and rp.paquete_id is not null
    and c.id = rp.contrato_id
    and ps.id = c.proveedor_servicio_id
    and ser.id = ps.servicio_id
    and ser.tipo_servicio_id = 181
-and r.fecha_creacion >= to_date( $P{FECHA}, 'DD/MM/YYYY HH24:MI')
-order by r.fecha_inicio, r.fecha_creacion, ser.codigo]]>
+   and s.codigo != 'LMO'
+   and rp.contrato_id != 6741 --todo salvo warner
+   and r.fecha_creacion >= to_date($P{FECHA}, 'DD/MM/YYYY HH24:MI')
+   order by r.fecha_inicio, r.fecha_creacion, ser.codigo]]>
 	</queryString>
 	<field name="CODIGOSERVICIO" class="java.lang.String"/>
 	<field name="NOMBRESERVICIO" class="java.lang.String"/>
@@ -27,7 +30,6 @@ order by r.fecha_inicio, r.fecha_creacion, ser.codigo]]>
 	<field name="FECHA_INICIO" class="java.sql.Timestamp"/>
 	<field name="ESTADORESERVA" class="java.lang.String"/>
 	<field name="ESTADOSERVICIO" class="java.lang.String"/>
-	<field name="PAQUETE_ID" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -36,7 +38,7 @@ order by r.fecha_inicio, r.fecha_creacion, ser.codigo]]>
 			<staticText>
 				<reportElement x="15" y="0" width="196" height="39" forecolor="#00CC33" uuid="0d9fdba2-b64b-4ccc-99aa-9abae95f954b"/>
 				<textElement>
-					<font fontName="Calibri" size="24" isBold="true"/>
+					<font fontName="SansSerif" size="24" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Europlayas]]></text>
 			</staticText>
@@ -140,13 +142,6 @@ order by r.fecha_inicio, r.fecha_creacion, ser.codigo]]>
 				</textElement>
 				<text><![CDATA[E.S.]]></text>
 			</staticText>
-			<staticText>
-				<reportElement x="483" y="4" width="50" height="20" uuid="3819da71-e983-41de-9362-7537b0b1e48b"/>
-				<textElement>
-					<font size="12" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Paquete]]></text>
-			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
@@ -191,10 +186,6 @@ order by r.fecha_inicio, r.fecha_creacion, ser.codigo]]>
 			<textField>
 				<reportElement x="448" y="2" width="21" height="20" uuid="8331b995-cdd6-4ce1-b4aa-28f6a7033e8d"/>
 				<textFieldExpression><![CDATA[$F{ESTADOSERVICIO}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="483" y="2" width="38" height="20" uuid="730ea41d-3043-4f65-acd2-94f03fee3849"/>
-				<textFieldExpression><![CDATA[$F{PAQUETE_ID}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
