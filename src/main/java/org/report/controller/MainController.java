@@ -22,14 +22,14 @@ public class MainController {
 	private String destFolder;	
 	
 	@RequestMapping("/")
-	@Scheduled(cron="0 0 9,15 * * ?")
+	@Scheduled(cron="${app.mail.cron1}")
 	public String reportController(){
 		buildReport.createReports(sourceFolder, destFolder);
 		return "The reports are build";
 	}
 	
 	@RequestMapping("/send")
-	@Scheduled(cron="0 15 9,15 * * ?")
+	@Scheduled(cron="${app.mail.cron2}")
 	public String reportSend(){
 		buildReport.sendReport(destFolder);
 		return "The reports are sended";

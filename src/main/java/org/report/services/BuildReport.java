@@ -92,28 +92,32 @@ public class BuildReport {
 	
 	private void generatePDF(File source, String destFolder) {
 		Connection connection = getConnection();
-		String compiledReport;
 		try {
 			DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-			compiledReport = JasperCompileManager.compileReportToFile(source.getAbsolutePath());
+			String jasperFile = source.getAbsolutePath().replaceAll(".jrxml", ".jasper"); 
+			JasperCompileManager.compileReportToFile(source.getAbsolutePath(),jasperFile);
+			log.info("JasperFile -->"+jasperFile);
 			Map<String, Object> params = new HashMap<String, Object>();			
 			params.put("FECHA", df.format(getDateLessOne()));
-			JasperPrint jasperPrint = JasperFillManager.fillReport(compiledReport, params, connection);
+			JasperPrint jasperPrint = JasperFillManager.fillReport(jasperFile, params, connection);
 			String destFileName = destFolder+File.separator+source.getName().replace(".jrxml", ".pdf");
+			log.info(destFileName);
 			JasperExportManager.exportReportToPdfFile(jasperPrint, destFileName);
 		} catch (JRException e) { 
 			log.error("Error en la compilación del fichero ",e);
 		}
 	}
 
-	public void createReports(String sourceFolder, String destFolder) {
+	public String createReports(String sourceFolder, String destFolder) {
 		log.info("Se va a crear el report");
 		try {			
 			List<File> sources = this.listFilesForFolder(new File(sourceFolder),".jrxml");
 			sources.forEach(source -> generatePDF(source, destFolder));
 		} catch (Exception ex) {
 			log.error("Error generando los ficheros pdf", ex);
+			return ex.toString();
 		}
+		return "Reports created";
 	}
 
 	private Properties init() {

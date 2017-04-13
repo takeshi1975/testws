@@ -7,19 +7,19 @@
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[select ser.codigo codigoservicio, ser.nombre nombreservicio, s.codigo codigosistema, r.localizador, r.expediente, r.fecha_creacion, r.fecha_inicio, r.estado estadoReserva, rp.estado estadoServicio
+		<![CDATA[-- Reservas Ferrari Land
+
+select ser.codigo codigoservicio, ser.nombre nombreservicio, s.codigo codigosistema, r.localizador, r.expediente, r.fecha_creacion, r.fecha_inicio, r.estado estadoReserva, rp.estado estadoServicio, rp.paquete_id
   from reserva r, reserva_proser rp, sistema s, contrato c, proveedor_servicio ps, servicio ser
  where r.id = rp.reserva_id
    and s.id = r.sistema_id
-   and rp.paquete_id is not null
    and c.id = rp.contrato_id
    and ps.id = c.proveedor_servicio_id
    and ser.id = ps.servicio_id
    and ser.tipo_servicio_id = 181
-   and s.codigo != 'LMO'
-   and rp.contrato_id != 6741 --todo salvo warner
-   and r.fecha_creacion >= to_date($P{FECHA}, 'DD/MM/YYYY HH24:MI')
-   order by r.fecha_inicio, r.fecha_creacion, ser.codigo]]>
+and ser.codigo = '112947'
+and r.fecha_creacion >= to_date($P{FECHA}, 'DD/MM/YYYY HH24:MI')
+order by r.fecha_inicio, r.fecha_creacion, ser.codigo]]>
 	</queryString>
 	<field name="CODIGOSERVICIO" class="java.lang.String"/>
 	<field name="NOMBRESERVICIO" class="java.lang.String"/>
@@ -30,6 +30,7 @@
 	<field name="FECHA_INICIO" class="java.sql.Timestamp"/>
 	<field name="ESTADORESERVA" class="java.lang.String"/>
 	<field name="ESTADOSERVICIO" class="java.lang.String"/>
+	<field name="PAQUETE_ID" class="java.math.BigDecimal"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -75,6 +76,13 @@
 				<reportElement x="58" y="0" width="100" height="20" uuid="f38d081a-73b3-4f7d-8779-7e7b8300ed20"/>
 				<textFieldExpression><![CDATA[$P{FECHA}]]></textFieldExpression>
 			</textField>
+			<staticText>
+				<reportElement x="15" y="23" width="143" height="20" uuid="19ef8ce7-0b81-446e-b52f-8f0fe15c411f"/>
+				<textElement>
+					<font isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Reservas Ferrari Land]]></text>
+			</staticText>
 		</band>
 	</pageHeader>
 	<columnHeader>
@@ -142,50 +150,61 @@
 				</textElement>
 				<text><![CDATA[E.S.]]></text>
 			</staticText>
+			<staticText>
+				<reportElement x="483" y="4" width="61" height="20" uuid="7f6826a6-51d3-42a9-a46e-bc7ac62745b9"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Paquete]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
 		<band height="26" splitType="Stretch">
 			<rectangle>
-				<reportElement x="0" y="2" width="548" height="20" isPrintWhenDetailOverflows="true" forecolor="#FFFFFF" backcolor="#CCFFFF" uuid="80bc3812-b730-447d-93ec-722f1ff192a5">
+				<reportElement x="0" y="2" width="548" height="20" isPrintWhenDetailOverflows="true" forecolor="#FFFFFF" backcolor="#CCCCFF" uuid="80bc3812-b730-447d-93ec-722f1ff192a5">
 					<printWhenExpression><![CDATA[$V{REPORT_COUNT}%2==0]]></printWhenExpression>
 				</reportElement>
 			</rectangle>
 			<textField>
-				<reportElement x="0" y="2" width="26" height="20" uuid="34de47a3-b327-4e36-a145-eb8928a52faf"/>
+				<reportElement x="0" y="6" width="26" height="20" uuid="34de47a3-b327-4e36-a145-eb8928a52faf"/>
 				<textFieldExpression><![CDATA[$F{CODIGOSERVICIO}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="26" y="2" width="100" height="20" uuid="8a374457-e1fc-4242-b9ce-8c812fc75e38"/>
+				<reportElement x="26" y="6" width="100" height="20" uuid="8a374457-e1fc-4242-b9ce-8c812fc75e38"/>
 				<textFieldExpression><![CDATA[$F{NOMBRESERVICIO}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="126" y="2" width="51" height="20" uuid="02e14631-2372-4350-a568-3278f2254ae8"/>
+				<reportElement x="126" y="6" width="51" height="20" uuid="02e14631-2372-4350-a568-3278f2254ae8"/>
 				<textFieldExpression><![CDATA[$F{CODIGOSISTEMA}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="177" y="2" width="47" height="20" uuid="2dad2b9f-49bb-45c0-9eed-cde8e554b0c1"/>
+				<reportElement x="177" y="6" width="47" height="20" uuid="2dad2b9f-49bb-45c0-9eed-cde8e554b0c1"/>
 				<textFieldExpression><![CDATA[$F{LOCALIZADOR}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="230" y="2" width="59" height="20" uuid="3b50e6c7-4356-4770-8230-f31303e03e61"/>
+				<reportElement x="230" y="6" width="59" height="20" uuid="3b50e6c7-4356-4770-8230-f31303e03e61"/>
 				<textFieldExpression><![CDATA[$F{EXPEDIENTE}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="301" y="2" width="46" height="20" uuid="ff3a3ef2-3a7d-4231-b713-32004e276ce3"/>
+				<reportElement x="301" y="6" width="46" height="20" uuid="ff3a3ef2-3a7d-4231-b713-32004e276ce3"/>
 				<textFieldExpression><![CDATA[$F{FECHA_CREACION}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="366" y="2" width="46" height="20" uuid="c4469e15-d11a-4226-97ca-5d47e52c0548"/>
+				<reportElement x="366" y="6" width="46" height="20" uuid="c4469e15-d11a-4226-97ca-5d47e52c0548"/>
 				<textFieldExpression><![CDATA[$F{FECHA_INICIO}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="415" y="2" width="23" height="20" uuid="085ac1f6-e123-4163-a7c4-a89a4a72145a"/>
+				<reportElement x="415" y="6" width="23" height="20" uuid="085ac1f6-e123-4163-a7c4-a89a4a72145a"/>
 				<textFieldExpression><![CDATA[$F{ESTADORESERVA}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="448" y="2" width="21" height="20" uuid="8331b995-cdd6-4ce1-b4aa-28f6a7033e8d"/>
+				<reportElement x="448" y="6" width="21" height="20" uuid="8331b995-cdd6-4ce1-b4aa-28f6a7033e8d"/>
 				<textFieldExpression><![CDATA[$F{ESTADOSERVICIO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="483" y="6" width="61" height="20" uuid="28c818fc-123b-485e-9691-2bc4b8ebd8c7"/>
+				<textFieldExpression><![CDATA[$F{PAQUETE_ID}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
