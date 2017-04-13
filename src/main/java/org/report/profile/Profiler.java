@@ -1,10 +1,15 @@
 package org.report.profile;
 
+
+
 import org.apache.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
+
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
 
 @Aspect
 @Component
@@ -12,13 +17,16 @@ public class Profiler {
 
 	private static final Logger log = Logger.getLogger(Profiler.class);
 	
-	@Around("execution(* org.report.service.*.*(..))")
+	@Around("execution(* org.report.services.*.*(..))")
 	public Object profile(ProceedingJoinPoint joinPoint) throws Throwable{
-		log.info("Estamos en el profiler *");
-		long t1 = System.currentTimeMillis();
-		Object result =  joinPoint.proceed();
-		long t2 = System.currentTimeMillis();		
-		log.info("Fin del profiler. Time -->"+(t2-t1));
+		Monitor monitor = MonitorFactory.start("services.monitor");
+		Object result = null;
+		try {
+			result = joinPoint.proceed();
+		} finally {
+			monitor.stop();
+		}
+		log.info(monitor);
 		return result;
 	}
 	
